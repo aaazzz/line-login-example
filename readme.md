@@ -1,4 +1,4 @@
-# LINE Lonin API demo
+# LINE Login API demo
 
 ## how to use
 0. copy `.env.example` to `.env` and fill your channel information
