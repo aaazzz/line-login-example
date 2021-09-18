@@ -2,6 +2,7 @@ const express = require('express')
 const axios = require('axios')
 const querystring = require('querystring')
 const dotenv = require('dotenv')
+const db = require('./db-config');
 const app = express()
 const port = 5000
 
@@ -9,11 +10,20 @@ dotenv.config()
 const channel_id = process.env.CHANNEL_ID
 const client_secret = process.env.CLIENT_SECRET
 const state = process.env.STATE
-const redirect_uri = 'http://localhost:5000'
+const redirect_uri = 'http://localhost:5000/callback'
 const scope = 'profile%20openid'
 const url = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channel_id}&redirect_uri=${redirect_uri}&state=${state}&scope=${scope}`
 
-app.get('/', async (req, res) => {
+app.get('/login', (req, res) => {
+  // some logic before login here
+
+  
+  // redirect to LINE login
+  res.redirect(url)
+})
+
+app.get('/callback', async (req, res) => {
+  // some logic after login here
   const {code, state} = req.query
 
   try {
@@ -43,13 +53,6 @@ app.get('/', async (req, res) => {
     console.log(e)
     res.send('error happened')
   }
-})
-
-app.get('/login', (req, res) => {
-  // some logic here
-  
-  // redirect to LINE login
-  res.redirect(url)
 })
 
 app.listen(port, () => {
