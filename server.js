@@ -45,6 +45,14 @@ app.get('/', async (req, res) => {
   }
 })
 
-app.listen(port, () => {
-  console.log('LINE login URL: ' + url)
+app.get('/login', (req, res) => {
+  // some logic here
+  
+  // redirect to LINE login
+  res.redirect(url)
 })
+
+app.listen(port, () => {
+  console.log('http://localhost:5000/login')
+})
+
