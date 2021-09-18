@@ -14,6 +14,7 @@ const state = process.env.STATE
 const redirect_uri = 'http://localhost:5000/callback'
 const scope = 'profile%20openid'
 const url = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channel_id}&redirect_uri=${redirect_uri}&state=${state}&scope=${scope}`
+const userPage = process.env.USER_PAGE
 
 app.get('/login', (req, res) => {
   // some logic before login here
@@ -50,13 +51,6 @@ app.get('/callback', async (req, res) => {
       }
     })
 
-    const html = `
-<pre>
-${JSON.stringify({code,state,...tokenResponse.data,...verifyResponse.data,...profileResponse.data},null,4)}
-</pre>
-<img src=${verifyResponse.data.picture} width="200">
-`.trim()
-
     const payload = {
       user_id: profileResponse.data.userId, 
       name: profileResponse.data.displayName,
@@ -76,11 +70,8 @@ ${JSON.stringify({code,state,...tokenResponse.data,...verifyResponse.data,...pro
       updated_at: dateformat(new Date(), 'isoUtcDateTime')
     })
 
-    res.format({
-      html: () => {
-        res.send(html)
-      }
-    })
+    res.redirect(`${userPage}/?${profileResponse.data.displayName}`)
+
   } catch (e) {
     console.log(e)
     res.send('error happened')
