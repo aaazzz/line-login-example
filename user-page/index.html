@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Title of the document</title>
+</head>
+
+<body>
+  <h1>Form</h1>
+  <a href="http://localhost:5000/login"><button>LINE login</button></a>
+  <hr>
+  <form>
+    <label for="fname">LINE ID (it must be hidden in production):</label><br>
+    <input type="text" id="id" name="id" disabled><br>
+
+    <label for="fname">Name:</label><br>
+    <input type="text" id="name" name="name"><br>
+
+    <label for="fname">Other Info:</label><br>
+    <input type="text" id="other" name="other"><br>
+
+  </form>
+  <hr>
+  <button onClick="register()">Register</button>
+</body>
+<script>
+  function setParam(field) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has(field)) {
+      console.log(field + ' does not exist in query string');
+      return;
+    }
+    document.getElementById(field).value = urlParams.get(field);
+  }
+
+  function register() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const name = document.getElementById('name').value;
+    const other = document.getElementById('other').value;
+    fetch('http://localhost:5000/register/' + urlParams.get('id'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, other })
+    })
+      .then(response => response.json())
+      .then(data => console.log(data))
+  }
+
+  window.addEventListener('load', (event) => {
+    setParam('id');
+    setParam('name');
+  })
+
+</script>
+
+</html>

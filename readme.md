@@ -10,3 +10,7 @@ Simple demo with [LINE login API](https://developers.line.biz/en/docs/line-login
 2. npm run dev
 3. click the printed URL on the ocnsole
 4. login with your LINE id
+
+
+## todo
+[ ] apply OAuth2.0 ?

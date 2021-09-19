@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const axios = require('axios')
 const querystring = require('querystring')
 const dotenv = require('dotenv')
@@ -16,11 +17,48 @@ const scope = 'profile%20openid'
 const url = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channel_id}&redirect_uri=${redirect_uri}&state=${state}&scope=${scope}`
 const userPage = process.env.USER_PAGE
 
+app.use(express.json())
+app.use(cors())
+
 app.get('/login', (req, res) => {
   // some logic before login here
   
   // redirect to LINE login
   res.redirect(url)
+})
+
+app.get('/user/:otp', async (req, res, next) => {
+  if (req.params.otp === '1234') {
+    res.json({message: 'otp not matched'})
+  }
+
+  const records = await db.select().table('users').where('otp', '=', req.params.otp)
+
+  if (records.length === 0) {
+    return 
+  }
+
+  const payload = {
+    user_id: records[0].user_id,
+    name: records[0].name,
+    status_message: records[0].status_message,
+  }
+
+  res.json(payload)
+})
+
+app.post('/register/:user_id', async (req, res) => {
+  console.log(req.body)
+  const result = await db('users')
+    .where('user_id', '=', req.params.user_id)
+  .update({
+    name: req.body.name,
+    other: req.body.other,
+    updated_at: dateformat(new Date(), 'isoUtcDateTime')
+  })
+  res.json({
+    updated: result
+  })
 })
 
 app.get('/callback', async (req, res) => {
@@ -70,10 +108,20 @@ app.get('/callback', async (req, res) => {
       updated_at: dateformat(new Date(), 'isoUtcDateTime')
     })
 
-    res.redirect(`${userPage}/?${profileResponse.data.displayName}`)
+    console.log(`${userPage}?id=${profileResponse.data.userId}&name=${profileResponse.data.displayName}`)
+
+    // use one time token instead of real values...?
+    const otp = '1234'
+    await db('users')
+      .where('user_id', '=', profileResponse.data.userId)
+      .update({
+        otp: otp,
+        updated_at: dateformat(new Date(), 'isoUtcDateTime')
+      })
+    res.redirect(`${userPage}?t=${otp}`)
+    // res.redirect(`${userPage}?id=${profileResponse.data.userId}&name=${profileResponse.data.displayName}`)
 
   } catch (e) {
-    console.log(e)
     res.send('error happened')
   }
 })
